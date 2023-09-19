@@ -63,4 +63,19 @@ def user_response_list(request, quiz_id):
 def user_response_detail(request, user_response_id):
     user_response = get_object_or_404(UserResponse, pk=user_response_id)
     serializer = UserResponseSerializer(user_response)
-    return Response(serializer.data)
+    data = serializer.data
+    
+    # Calculate the number of questions the user got right
+    quiz_id = data['quiz']
+    quiz = Quiz.objects.get(pk=quiz_id)
+    correct_choices = Choice.objects.filter(question__quiz=quiz, is_answer=True)
+    user_choices = Choice.objects.filter(user_responses=user_response)
+    num_correct = 0
+    for choice in user_choices:
+        if choice in correct_choices:
+            num_correct += 1
+    
+    # Add the number of correct answers to the response data
+    data['num_correct'] = num_correct
+    
+    return Response(data)
