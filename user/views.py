@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import UserSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import User
 @api_view(['GET'])
 def user_view(request, format=None):
@@ -16,14 +18,19 @@ def create_user(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def get_user(request, user_id):
-    user = User.objects.get(id=user_id)
-    serializer = UserSerializer(user)
-    return Response(serializer.data)    
-    
-    
-    
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['user_id'] = user.id
+        token['username'] = user.username
+        token['email'] = user.email
+        token['user_type'] = user.user_type
+        return token
+            
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
     
     
     
