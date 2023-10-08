@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Quiz, Question, Choice, UserResponse
+from rest_framework.permissions import IsAuthenticated
 from .serializers import QuizSerializer, QuestionSerializer, ChoiceSerializer, UserResponseSerializer
 
 @api_view(['GET'])
